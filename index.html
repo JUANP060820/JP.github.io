@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock with User Info</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #2f363e;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #time {
+            display: flex;
+            gap: 40px;
+            color: #fff;
+        }
+
+        #time .circle {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #time .circle svg {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            transform: rotate(270deg);
+        }
+
+        #time .circle svg circle {
+            width: 100%;
+            height: 100%;
+            fill: transparent;
+            stroke: #191919;
+            stroke-width: 4px;
+            transform: translate(5px, 5px);
+        }
+
+        #time .circle svg circle:nth-child(2) {
+            stroke: var(--color);
+            stroke-dasharray: 440;
+        }
+
+        #time div {
+            position: absolute;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        #time div span {
+            position: absolute;
+            transform: translate(-50%, 0px);
+            font-size: 0.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+        }
+
+        #time .ap {
+            position: relative;
+            font-size: 1rem;
+            transform: translate(-20px);
+        }
+
+        .dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .dots::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            width: 15px;
+            height: 15px;
+            background: var(--color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--color), 0 0 60px var(--color);
+        }
+
+        /* Form styling */
+        .user-info-form {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        .user-info-form input {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            background-color: #444;
+        }
+
+        .user-info-form button {
+            padding: 10px 15px;
+            background-color: #ff2972;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .user-info-form button:hover {
+            background-color: #ff004d;
+        }
+
+        .user-info-form p {
+            font-size: 1rem;
+            margin: 10px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="time">
+            <div class="circle" style="--color: #ff2972">
+                <div class="dots h_dot"></div>
+                <svg>
+                    <circle cx="70" cy="70" r="70"></circle>
+                    <circle cx="70" cy="70" r="70" id="hh"></circle>
+                </svg>
+                <div id="hours">00</div>
+            </div>
+            <div class="circle" style="--color: #fee800">
+                <div class="dots m_dot"></div>
+                <svg>
+                    <circle cx="70" cy="70" r="70"></circle>
+                    <circle cx="70" cy="70" r="70" id="mm"></circle>
+                </svg>
+                <div id="minutes">00</div>
+            </div>
+            <div class="circle" style="--color: #04fc43">
+                <div class="dots s_dot"></div>
+                <svg>
+                    <circle cx="70" cy="70" r="70"></circle>
+                    <circle cx="70" cy="70" r="70" id="ss"></circle>
+                </svg>
+                <div id="seconds">00</div>
+            </div>
+            <div class="ap">
+                <div id="ampm">AM</div>
+            </div>
+        </div>
+
+        <!-- User Information Form -->
+        <div class="user-info-form">
+            <input type="text" id="userName" placeholder="Enter your name">
+            <input type="number" id="userAge" placeholder="Enter your age">
+            <input type="text" id="userLocation" placeholder="Enter your location">
+            <button onclick="saveUserInfo()">Save User Info</button>
+            <button onclick="clearUserInfo()">Clear User Info</button>
+            <p id="userInfo"></p>
+        </div>
+    </div>
+
+    <script>
+        // Clock functionality
+        setInterval(() => {
+            // get time indicator elements
+            let hours = document.getElementById('hours');
+            let minutes = document.getElementById('minutes');
+            let secondes = document.getElementById('seconds');
+            let ampm = document.getElementById('ampm');
+
+            // digits time indicator
+            let hh = document.getElementById('hh');
+            let mm = document.getElementById('mm');
+            let ss = document.getElementById('ss');
+
+            // dot time indicator
+            let dotH = document.querySelector('.h_dot');
+            let dotM = document.querySelector('.m_dot');
+            let dotS = document.querySelector('.s_dot');
+
+            // get current time
+            let h = new Date().getHours();
+            let m = new Date().getMinutes();
+            let s = new Date().getSeconds();
+            let ap = h >= 12 ? 'PM' : 'AM';
+
+            // convert to 12 hour format
+            if (h > 12) {
+                h = h - 12;
+            }
+
+            // add 0 before single digit
+            h = h < 10 ? '0' + h : h;
+            m = m < 10 ? '0' + m : m;
+            s = s < 10 ? '0' + s : s;
+
+            // set time and label
+            hours.innerHTML = h + ' Hours';
+            minutes.innerHTML = m + ' Minutes';
+            secondes.innerHTML = s + ' Seconds';
+            ampm.innerHTML = ap;
+
+            // set time circular indicator
+            hh.style.strokeDashoffset = 440 - (440 * h) / 12;
+            mm.style.strokeDashoffset = 440 - (440 * m) / 60;
+            ss.style.strokeDashoffset = 440 - (440 * s) / 60;
+
+            // set dot time position indicator
+            dotH.style.transform = `rotate(${h * 30}deg)`;
+            dotM.style.transform = `rotate(${m * 6}deg)`;
+            dotS.style.transform = `rotate(${s * 6}deg)`;
+        }, 1000);
+
+        // Save user info to localStorage
+        function saveUserInfo() {
+            const name = document.getElementById('userName').value;
+            const age = document.getElementById('userAge').value;
+            const location = document.getElementById('userLocation').value;
+
+            const userInfo = { name, age, location };
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+            displayUserInfo();
+        }
+
+        // Clear user info from localStorage
+        function clearUserInfo() {
+            localStorage.removeItem('userInfo');
+            displayUserInfo();
+        }
+
+        // Display user info from localStorage
+        function displayUserInfo() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const userInfoDisplay = document.getElementById('userInfo');
+
+            if (userInfo) {
+                userInfoDisplay.textContent = `Name: ${userInfo.name}, Age: ${userInfo.age}, Location: ${userInfo.location}`;
+            } else {
+                userInfoDisplay.textContent = 'No user information saved.';
+            }
+        }
+
+        // Display saved user info on page load
+        window.onload = displayUserInfo;
+    </script>
+</body>
+</html>
